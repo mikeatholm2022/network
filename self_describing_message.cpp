@@ -1,6 +1,5 @@
 // sd_msg.cpp
 
-#include "pch.h"
 #include "self_describing_message.h"
 #include "self_describing_message_tags.h"
 
