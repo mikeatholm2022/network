@@ -35,6 +35,7 @@ namespace chaos
             std::string     m_payload;
             SDMMap          m_map;
 
+            bool parse_tag_value( const std::string& tag_value, std::string& tag, std::string& value );
             void parse( const std::string& payload );
             void parse_payload( const std::string& payload );
 

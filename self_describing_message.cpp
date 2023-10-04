@@ -3,6 +3,7 @@
 #include "self_describing_message.h"
 #include "self_describing_message_tags.h"
 
+#include <iostream>
 #include <algorithm>
 #include <boost/tokenizer.hpp>
 #include <boost/lexical_cast.hpp>
@@ -65,30 +66,54 @@ namespace chaos
         void SDMessage::parse_payload( const std::string& payload )
         {
             clear();
+            m_payload = payload;
             parse(payload);
         }
 
         // ========================================================================================
         void SDMessage::parse( const std::string& payload )
         {
-            typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-            boost::char_separator<char> sep{ "=", "|" };
-            tokenizer tok{ payload, sep };
-
-            std::int32_t index = 0, tag = 0;
-            for (const auto& t : tok)
+            if (!payload.empty())
             {
-                if (index == 0)
+                std::int32_t itag = 0;
+                std::string tag, value;
+                for (auto const &t : boost::tokenizer{payload, boost::char_separator{"|"}} )
                 {
-                    tag = boost::lexical_cast<std::int32_t>(t);
-                    index++;
-                }
-                else
-                {
-                    m_map.insert(std::make_pair(tag, t));
-                    index = 0;
+                    if (parse_tag_value(t, tag, value))
+                    {
+                        itag = boost::lexical_cast<std::int32_t>(tag);
+                        m_map.insert(std::make_pair(itag, value));
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
             }
+        }
+
+        // ========================================================================================
+        bool SDMessage::parse_tag_value( const std::string& tag_value, std::string& tag, std::string& value )
+        {
+            if (!tag_value.empty())
+            {
+                std::int32_t index = 0;
+                for (auto const &t : boost::tokenizer{tag_value, boost::char_separator{"="}} )
+                {
+                    if (index == 0)
+                    {
+                        tag = t;
+                        index++;
+                    }
+                    else
+                    {
+                        value = t;
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         // ========================================================================================
